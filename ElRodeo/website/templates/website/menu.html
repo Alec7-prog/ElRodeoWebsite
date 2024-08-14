@@ -2,5 +2,102 @@
 {% load static %}
 
 {% block content %}
-    <h3>menu</h3>
+    <h3>Menu</h3>
+    <div id="carouselExampleIndicators" class="carousel slide" data-ride="carousel">
+        <ol class="carousel-indicators">
+          <li data-target="#carouselExampleIndicators" data-slide-to="0" class="active"></li>
+          <li data-target="#carouselExampleIndicators" data-slide-to="1"></li>
+          <li data-target="#carouselExampleIndicators" data-slide-to="2"></li>
+        </ol>
+        <div class="carousel-inner">
+          <div class="carousel-item active">
+            <a id="Carne"><img class="d-block w-100" src="{% static 'images/black.jpg' %}" alt="First slide"></a>
+            <div class="carousel-caption d-none d-md-block">
+                <h5 style="color: white;">Carne</h5>
+            </div>
+        </div>
+          <div class="carousel-item">
+            <a id="Mariscos"><img class="d-block w-100" src="{% static 'images/black.jpg' %}" alt="Second slide"></a>
+            <div class="carousel-caption d-none d-md-block">
+                <h5 style="color: white;">Mariscos</h5>
+            </div>
+          </div>
+          <div class="carousel-item">
+            <a id="Bebidas"><img class="d-block w-100" src="{% static 'images/black.jpg' %}" alt="Third slide"></a>
+            <div class="carousel-caption d-none d-md-block">
+                <h5 style="color: white;">Bebidas</h5>
+            </div>
+          </div>
+        </div>
+        <a class="carousel-control-prev" href="#carouselExampleIndicators" role="button" data-slide="prev">
+          <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+          <span class="sr-only">Previous</span>
+        </a>
+        <a class="carousel-control-next" href="#carouselExampleIndicators" role="button" data-slide="next">
+          <span class="carousel-control-next-icon" aria-hidden="true"></span>
+          <span class="sr-only">Next</span>
+        </a>
+      </div>
+
+      <div  id="Carne">
+        <h3><strong>Carne</strong></h3>
+        <hr>
+        <ul>
+            <div class="box-element food-item">
+                <h6>Fajita</h6>
+                <form id="quantity">
+                    <input type="text" placeholder="Quantity" name="input">
+                    <input style="margin-bottom: 10px;" id="form-button" class="btn btn-success btn-sm " type="submit" value="Continue">
+                </form>
+                <button style="margin-left: 50px;" data-product="{{product.id}}" data-action="add" class="btn btn-outline-secondary add-btn update-cart">Add to Cart</button>
+                <h4 style="display: inline-block;float: right">$1/lb</h4>
+                <h4 style="display: inline-block;float: left" id="item-total">Total: $0 </h4>
+            </div>
+        </ul>
+      </div>
+
+      <div  id="Mariscos">
+        <h3><strong>Mariscos</strong></h3>
+        <hr>
+        <ul>
+            <div class="box-element food-item">
+                <h6>Pezcado</h6>
+                <form id="quantity">
+                    <input type="text" placeholder="Quantity" name="input">
+                    <input style="margin-bottom: 10px;" id="form-button" class="btn btn-success btn-sm " type="submit" value="Continue">
+                </form>
+                <button style="margin-left: 50px;" data-product="{{product.id}}" data-action="add" class="btn btn-outline-secondary add-btn update-cart">Add to Cart</button>
+                <h4 style="display: inline-block;float: right">$1/lb</h4>
+                <h4 style="display: inline-block;float: left" id="item-total">Total: $0 </h4>
+            </div>
+        </ul>
+      </div>
+
+      <div  id="Bebidas">
+        <h3><strong>Bebidas</strong></h3>
+        <hr>
+        <ul>
+            <div class="box-element food-item">
+                <h6>CocaCola</h6>
+                <form id="quantity">
+                    <input type="text" placeholder="Quantity" name="input">
+                    <input style="margin-bottom: 10px;" id="form-button" class="btn btn-success btn-sm " type="submit" value="Continue">
+                </form>
+                <button style="margin-left: 50px;" data-product="{{product.id}}" data-action="add" class="btn btn-outline-secondary add-btn update-cart">Add to Cart</button>
+                <h4 style="display: inline-block;float: right">$1/lb</h4>
+                <h4 style="display: inline-block;float: left" id="item-total">Total: $0 </h4>
+            </div>
+        </ul>
+      </div>
+
+      <script type="text/javascript">
+        var submit = document.getElementById('quantity')
+        submit.addEventListener('submit', function(e){
+            var quantity = submit.elements['input'].value
+            e.preventDefault()
+            console.log('quantity: ' + (quantity * 2))
+            document.getElementById('item-total').innerHTML = 'Total: $' + (quantity * 2)
+            // document.getElementById('item_total').innerHTML = 'Total: ' + quantity
+        })
+      </script>
 {% endblock %}
