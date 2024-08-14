@@ -43,33 +43,35 @@
         <h3><strong>Carne</strong></h3>
         <hr>
         <ul>
+          {% for item in meatProducts %}
             <div class="box-element food-item">
-                <h6>Fajita</h6>
-                <form id="quantity">
-                    <input type="text" placeholder="Quantity" name="input">
-                    <input style="margin-bottom: 10px;" id="form-button" class="btn btn-success btn-sm " type="submit" value="Continue">
+                <h6>{{item.name}}</h6>
+                <form id="quantity" name="{{item.name}}">
+                    <input type="text" placeholder="Quantity" name="input" id="input">
+                    <button style="margin-left: 50px;" data-product="{{item.name}}" data-action="add" class="btn btn-outline-secondary add-btn update-cart">Add to Cart</button>
                 </form>
-                <button style="margin-left: 50px;" data-product="{{product.id}}" data-action="add" class="btn btn-outline-secondary add-btn update-cart">Add to Cart</button>
-                <h4 style="display: inline-block;float: right">$1/lb</h4>
-                <h4 style="display: inline-block;float: left" id="item-total">Total: $0 </h4>
+                <h4 style="display: inline-block;float: right" id="{{item.name}}-price">${{item.price|floatformat:2}} /lb</h4>
+                <h4 style="display: inline-block;float: left" id="{{item.name}}-total">Total: $0 </h4>
             </div>
+            {% endfor %}
         </ul>
       </div>
 
-      <div  id="Mariscos">
-        <h3><strong>Mariscos</strong></h3>
+      <div  id="Other">
+        <h3><strong>Other</strong></h3>
         <hr>
         <ul>
+            {% for item in other %}
             <div class="box-element food-item">
-                <h6>Pezcado</h6>
-                <form id="quantity">
-                    <input type="text" placeholder="Quantity" name="input">
-                    <input style="margin-bottom: 10px;" id="form-button" class="btn btn-success btn-sm " type="submit" value="Continue">
+                <h6>{{item.name}}</h6>
+                <form id="quantity" name="{{item.name}}">
+                    <input type="text" placeholder="Quantity" name="input" id="input">
+                    <button style="margin-left: 50px;" data-product="{{item.name}}" data-action="add" class="btn btn-outline-secondary add-btn update-cart">Add to Cart</button>
                 </form>
-                <button style="margin-left: 50px;" data-product="{{product.id}}" data-action="add" class="btn btn-outline-secondary add-btn update-cart">Add to Cart</button>
-                <h4 style="display: inline-block;float: right">$1/lb</h4>
-                <h4 style="display: inline-block;float: left" id="item-total">Total: $0 </h4>
+                <h4 style="display: inline-block;float: right" id="{{item.name}}-price">${{item.price|floatformat:2}}</h4>
+                <h4 style="display: inline-block;float: left" id="{{item.name}}-total">Total: $0 </h4>
             </div>
+            {% endfor %}
         </ul>
       </div>
 
@@ -77,27 +79,36 @@
         <h3><strong>Bebidas</strong></h3>
         <hr>
         <ul>
+            {% for item in drinks %}
             <div class="box-element food-item">
-                <h6>CocaCola</h6>
-                <form id="quantity">
-                    <input type="text" placeholder="Quantity" name="input">
-                    <input style="margin-bottom: 10px;" id="form-button" class="btn btn-success btn-sm " type="submit" value="Continue">
+                <h6>{{item.name}}</h6>
+                <form id="quantity" name="{{item.name}}">
+                    <input type="text" placeholder="Quantity" name="input" id="input">
+                    <button style="margin-left: 50px;" data-product="{{item.name}}" data-action="add" class="btn btn-outline-secondary add-btn update-cart">Add to Cart</button>
+
                 </form>
-                <button style="margin-left: 50px;" data-product="{{product.id}}" data-action="add" class="btn btn-outline-secondary add-btn update-cart">Add to Cart</button>
-                <h4 style="display: inline-block;float: right">$1/lb</h4>
-                <h4 style="display: inline-block;float: left" id="item-total">Total: $0 </h4>
+                <h4 style="display: inline-block;float: right" id="{{item.name}}-price">${{item.price|floatformat:2}}</h4>
+                <h4 style="display: inline-block;float: left" id="{{item.name}}-total">Total: $0 </h4>
             </div>
+            {% endfor %}
         </ul>
       </div>
 
       <script type="text/javascript">
-        var submit = document.getElementById('quantity')
-        submit.addEventListener('submit', function(e){
-            var quantity = submit.elements['input'].value
+        var foodItem = document.getElementsByClassName('food-item')
+
+        for(i = 0; i < foodItem.length; i++){
+          item = foodItem[i]
+
+          item.children[1].addEventListener('submit', function(e){
+            var quantity = this.input.value
+            var price = parseFloat(document.getElementById(this.name + '-price').innerHTML.substring(1))
+            console.log(price)
+
             e.preventDefault()
-            console.log('quantity: ' + (quantity * 2))
-            document.getElementById('item-total').innerHTML = 'Total: $' + (quantity * 2)
-            // document.getElementById('item_total').innerHTML = 'Total: ' + quantity
-        })
+            document.getElementById(this.name + '-total').innerHTML = 'Total: $' + (quantity * price)
+          })
+        }
       </script>
+
 {% endblock %}

@@ -1,0 +1,13 @@
+{% extends 'website/layout.html' %}
+{% load static %}
+
+{% block content %}
+    <h1>Orders</h1>
+    {% for key, vals in unfulfilled_list.items %}
+        <h1>{{key}}</h1>
+        {% for val1,val2 in vals.items %}
+            <h1>{{val1}} -- {{val2}} </h1>
+        {% endfor %}
+        <hr>
+    {% endfor %}
+{% endblock %}

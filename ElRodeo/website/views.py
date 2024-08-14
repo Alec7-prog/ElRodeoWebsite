@@ -6,8 +6,12 @@ from django.shortcuts import HttpResponseRedirect
 from django.urls import reverse
 from django.contrib.auth.models import User
 from django.contrib import messages
+import datetime
+import json
+from django.http import JsonResponse
+import random
 
-from .models import User
+from .models import *
 
 # Create your views here.
 
@@ -22,7 +26,7 @@ def login_view(request):
         # Check if authentication successful
         if user is not None:
             login(request, user)
-            return redirect('index')
+            return redirect('menu')
         else:
             return render(request, "website/login.html", {
                 "message": "Invalid email and/or password."
@@ -56,7 +60,120 @@ def logout_view(request):
     return redirect('login')
 
 def cart(request):
-    return
+    if request.user.is_authenticated: 
+        customer = request.user
+        order, created = Order.objects.get_or_create(customer=customer, complete=False)
+        items = order.orderitem_set.all()
+        cartItems = order.get_cart_items
+    else:
+        items = []
+        order = {'get_cart_total': 0, 'get_cart_items': 0}
+        cartItems = order['get_cart_items']
+
+    return render(request, 'website/cart.html', {
+        'items': items,
+        'order': order,
+        'cartItems': cartItems
+    })
 
 def menu(request):
-    return render(request, "website/menu.html")
+    if request.user.is_authenticated:
+        customer = request.user
+        order, created = Order.objects.get_or_create(customer=customer, complete=False)
+        items = order.orderitem_set.all()
+        cartItems = order.get_cart_items
+    else:
+        items = []
+        order = {'get_cart_total': 0, 'get_cart_items': 0}
+        cartItems = order['get_cart_items']
+
+    meatProducts = Product.objects.filter(category='Meat')
+    other = Product.objects.filter(category='Other')
+    drinks = Product.objects.filter(category='Drinks')
+
+    return render(request, "website/menu.html", {
+        'meatProducts': meatProducts, 
+        'other': other, 
+        'drinks': drinks,
+        'items': items,
+        'cartItems': cartItems
+    })
+
+def checkout(request):
+    if request.user.is_authenticated:
+        customer = request.user
+        order, created = Order.objects.get_or_create(customer=customer, complete=False)
+        items = order.orderitem_set.all()
+        cartItems = order.get_cart_items
+    else:
+        items = []
+        order = {'get_cart_total': 0, 'get_cart_items': 0}
+        cartItems = order['get_cart_items']
+
+    return render(request, 'website/checkout.html', {
+        'items': items,
+        'order': order,
+        'cartItems': cartItems
+    })
+
+def updateItem(request): 
+    data = json.loads(request.body)
+    productId = data['productId']
+    action = data['action']
+
+    print('Action: ', action)
+    print('ProductID:', productId)
+
+    customer = request.user
+    product = Product.objects.get(name=productId)
+    order, created = Order.objects.get_or_create(customer=customer, complete=False)
+
+    orderItem, created = OrderItem.objects.get_or_create(order=order, product=product)
+
+    if action == 'add':
+        orderItem.quantity = (orderItem.quantity + 1)
+    elif action == 'remove':
+        orderItem.quantity = (orderItem.quantity - 1)
+
+    orderItem.save()
+
+    if orderItem.quantity <= 0:
+        orderItem.delete()
+
+    return JsonResponse('Item was added', safe=False)
+
+def processOrder(request):
+    transaction_id = datetime.datetime.now().timestamp()
+    data = json.loads(request.body)
+
+    if request.user.is_authenticated:
+        customer = request.user
+        order, created = Order.objects.get_or_create(customer=customer, complete=False)
+        total = float(data['form']['total'])
+        order.transaction_id = transaction_id
+
+        if total == order.get_cart_total:
+            order.complete = True
+
+        order.save()
+    else:
+        print('User is not logged in')
+    return JsonResponse('Payment complete', safe=False)
+
+def orders(request):
+    orders = Order.objects.all()
+    list = {}
+    for order in orders:
+        list[order.customer] = OrderItem.objects.filter(order=Order.objects.get(customer=order.customer))
+        print(order.customer)
+    print(list)
+    unfulfilled_list = {}
+    for key, vals in list.items():
+        product_list = {}
+        for x in vals:
+            product_list[x.product.name] = x.quantity
+        unfulfilled_list[key] = product_list
+
+    return render(request, 'website/orders.html', {
+        'unfulfilled_list': unfulfilled_list
+    })
