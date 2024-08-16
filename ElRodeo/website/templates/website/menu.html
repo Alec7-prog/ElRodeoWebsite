@@ -46,10 +46,11 @@
           {% for item in meatProducts %}
             <div class="box-element food-item">
                 <h6>{{item.name}}</h6>
-                <form id="quantity" name="{{item.name}}">
+                <form id="quantity" name="{{item.name}}" data-price="{{item.price}}">
                     <input type="text" placeholder="Quantity" name="input" id="input">
-                    <button style="margin-left: 50px;" data-product="{{item.name}}" data-action="add" class="btn btn-outline-secondary add-btn update-cart">Add to Cart</button>
+                    <input style="margin-bottom: 10px;" id="form-button" class="btn btn-success btn-sm " type="submit" value="Continue">
                 </form>
+                <button onclick="updateUserOrder('{{item.name}}' , 'add', parseInt(document.getElementsByName('{{item.name}}')[0].children[0].value), event)" style="margin-left: 50px;" data-product="{{item.name}}" data-action="add" class="btn btn-outline-secondary add-btn add-to-cart">Add to Cart</button>
                 <h4 style="display: inline-block;float: right" id="{{item.name}}-price">${{item.price|floatformat:2}} /lb</h4>
                 <h4 style="display: inline-block;float: left" id="{{item.name}}-total">Total: $0 </h4>
             </div>
@@ -66,8 +67,8 @@
                 <h6>{{item.name}}</h6>
                 <form id="quantity" name="{{item.name}}">
                     <input type="text" placeholder="Quantity" name="input" id="input">
-                    <button style="margin-left: 50px;" data-product="{{item.name}}" data-action="add" class="btn btn-outline-secondary add-btn update-cart">Add to Cart</button>
                 </form>
+                <button onclick="updateUserOrder('{{item.name}}' , 'add', parseInt(document.getElementsByName('{{item.name}}')[0].children[0].value), event)" style="margin-left: 50px;" data-product="{{item.name}}" data-action="add" class="btn btn-outline-secondary add-btn add-to-cart">Add to Cart</button>
                 <h4 style="display: inline-block;float: right" id="{{item.name}}-price">${{item.price|floatformat:2}}</h4>
                 <h4 style="display: inline-block;float: left" id="{{item.name}}-total">Total: $0 </h4>
             </div>
@@ -83,32 +84,53 @@
             <div class="box-element food-item">
                 <h6>{{item.name}}</h6>
                 <form id="quantity" name="{{item.name}}">
-                    <input type="text" placeholder="Quantity" name="input" id="input">
-                    <button style="margin-left: 50px;" data-product="{{item.name}}" data-action="add" class="btn btn-outline-secondary add-btn update-cart">Add to Cart</button>
-
+                    <input type="number" placeholder="Quantity" data-identifier="{{item.name}}" id="input">
                 </form>
+                <button onclick="updateUserOrder('{{item.name}}' , 'add', parseInt(document.getElementsByName('{{item.name}}')[0].children[0].value), event)" style="margin-left: 50px;" data-product="{{item.name}}" data-action="add" class="btn btn-outline-secondary add-btn add-to-cart">Add to Cart</button>
                 <h4 style="display: inline-block;float: right" id="{{item.name}}-price">${{item.price|floatformat:2}}</h4>
                 <h4 style="display: inline-block;float: left" id="{{item.name}}-total">Total: $0 </h4>
             </div>
             {% endfor %}
         </ul>
       </div>
-
-      <script type="text/javascript">
-        var foodItem = document.getElementsByClassName('food-item')
-
-        for(i = 0; i < foodItem.length; i++){
-          item = foodItem[i]
-
-          item.children[1].addEventListener('submit', function(e){
-            var quantity = this.input.value
-            var price = parseFloat(document.getElementById(this.name + '-price').innerHTML.substring(1))
-            console.log(price)
+      <script>
+          var submit = document.getElementById('quantity')
+          submit.addEventListener('submit', function(e){
+            var quantity = submit.elements['input'].value
+            var price = parseFloat(this.dataset['price'])
 
             e.preventDefault()
+            console.log(this)
+            console.log(quantity * price)
             document.getElementById(this.name + '-total').innerHTML = 'Total: $' + (quantity * price)
           })
-        }
-      </script>
+          
 
+          function updateUserOrder(productId, action, quantity, e){
+              console.log('User is logged in, sending data...')
+              console.log(quantity)
+
+              e.preventDefault()
+
+              var url = '/update_item/'
+
+                  fetch(url, {
+                      method: 'POST', 
+                      headers: {
+                          'Content-Type': 'application/json',
+                          'X-CSRFToken': csrftoken
+                      },
+                      body: JSON.stringify({'productId': productId, 'action': action, 'quantity': quantity})
+                  })
+
+                  .then((response) => {
+                      return response.json()
+                  })
+
+                  .then((data) => {
+                      console.log('data:', data)
+                      location.reload()
+                  })
+          }
+      </script>
 {% endblock %}

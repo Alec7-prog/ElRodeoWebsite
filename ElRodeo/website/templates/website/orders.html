@@ -8,6 +8,27 @@
         {% for val1,val2 in vals.items %}
             <h1>{{val1}} -- {{val2}} </h1>
         {% endfor %}
+        <button onclick="completeOrder('{{key}}')" style="margin-left: 50px;" name="{key}" class="btn btn-outline-secondary add-btn order-completed">Order Completed</button>
         <hr>
     {% endfor %}
+    <script>
+        function completeOrder(user) {
+            var url = 'order_completed'
+
+            fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrftoken, 
+                },
+                body: JSON.stringify({'user':user})
+            })
+            .then((response) => response.json())
+            .then((data) => {
+                console.log('Success', data);
+                alert('Order completed');
+                window.location.href="{% url 'orders' %}"
+            })
+        }   
+    </script>
 {% endblock %}

@@ -47,11 +47,11 @@ def register(request):
             messages.info(request, "User already exists")
             return redirect('register')
 
-        user = User.objects.create_user(email, password, first_name, last_name)
+        user = User.objects.create_user(email, password)
         
 
         messages.info(request, "Account Created Successfully!")
-        return redirect('menu')
+        return redirect('login')
     
     return render(request, "website/register.html")
 
@@ -120,9 +120,11 @@ def updateItem(request):
     data = json.loads(request.body)
     productId = data['productId']
     action = data['action']
+    quantity = data['quantity']
 
     print('Action: ', action)
     print('ProductID:', productId)
+    print('Quantity: ', quantity)
 
     customer = request.user
     product = Product.objects.get(name=productId)
@@ -131,9 +133,9 @@ def updateItem(request):
     orderItem, created = OrderItem.objects.get_or_create(order=order, product=product)
 
     if action == 'add':
-        orderItem.quantity = (orderItem.quantity + 1)
+        orderItem.quantity = (orderItem.quantity + quantity)
     elif action == 'remove':
-        orderItem.quantity = (orderItem.quantity - 1)
+        orderItem.quantity = (orderItem.quantity - quantity)
 
     orderItem.save()
 
@@ -142,29 +144,11 @@ def updateItem(request):
 
     return JsonResponse('Item was added', safe=False)
 
-def processOrder(request):
-    transaction_id = datetime.datetime.now().timestamp()
-    data = json.loads(request.body)
-
-    if request.user.is_authenticated:
-        customer = request.user
-        order, created = Order.objects.get_or_create(customer=customer, complete=False)
-        total = float(data['form']['total'])
-        order.transaction_id = transaction_id
-
-        if total == order.get_cart_total:
-            order.complete = True
-
-        order.save()
-    else:
-        print('User is not logged in')
-    return JsonResponse('Payment complete', safe=False)
-
 def orders(request):
-    orders = Order.objects.all()
+    orders = Order.objects.filter(submitted=True).filter(complete=False)
     list = {}
     for order in orders:
-        list[order.customer] = OrderItem.objects.filter(order=Order.objects.get(customer=order.customer))
+        list[order.customer] = OrderItem.objects.filter(order=order)
         print(order.customer)
     print(list)
     unfulfilled_list = {}
@@ -177,3 +161,28 @@ def orders(request):
     return render(request, 'website/orders.html', {
         'unfulfilled_list': unfulfilled_list
     })
+
+def order_completed(request):
+    data = json.loads(request.body)
+    user = User.objects.get(email=data['user'])
+
+    print(user)
+
+    order = Order.objects.filter(customer=user).get(complete=False)
+    print(order)
+    order.complete = True
+    order.save()
+
+    return JsonResponse("successful", safe=False)
+
+def submit_order(request):
+    data = json.loads(request.body)
+    user = User.objects.get(email=data['customer'])
+    order = Order.objects.filter(customer=user).get(submitted=False)
+
+    print(user)
+    print(order)
+    order.submitted = True
+    order.save()
+
+    return JsonResponse("Successful", safe=False)

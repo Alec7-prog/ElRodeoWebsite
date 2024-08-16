@@ -42,7 +42,7 @@ class Order(models.Model):
     customer = models.ForeignKey(User, on_delete=models.SET_NULL, blank=True, null=True)
     date_ordered = models.DateTimeField(auto_now_add=True)
     complete = models.BooleanField(default=False, null=True, blank=False)
-    transaction_id = models.CharField(max_length=200)
+    submitted = models.BooleanField(default=False, null=True, blank=False)
     product_list = models.ManyToManyField(Product, blank=True)
 
     def __str__(self):

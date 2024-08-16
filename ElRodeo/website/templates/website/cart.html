@@ -15,7 +15,7 @@
                     <th><h5>Items: <strong>{{order.get_cart_items}}</strong></h5></th>
                     <th><h5>Total: <strong>${{order.get_cart_total | floatformat:2}}</strong></h5></th>
                     <th>
-                        <a style="float:right;margin:5px" class="btn btn-success" href="{% url 'checkout' %}">Checkout</a>
+                        <a onclick="submitOrder('{{order.customer}}', event)" style="float:right;margin:5px" class="btn btn-success">Submit Order</a>
                     </th>
                 </tr>
             </table>
@@ -49,4 +49,29 @@
         {% endfor %}
     </div>
 </div>
+<script>
+    function submitOrder(customer, e){
+        console.log('User is logged in, sending data...')
+              console.log(customer)
+
+              e.preventDefault()
+
+              var url = '/submit_order/'
+
+                  fetch(url, {
+                      method: 'POST', 
+                      headers: {
+                          'Content-Type': 'application/json',
+                          'X-CSRFToken': csrftoken
+                      },
+                      body: JSON.stringify({'customer': customer})
+                  })
+                  .then((response) => response.json())
+                  .then((data) => {
+                    console.log('Success', data);
+                    alert('Order submitted');
+                    window.location.href="{% url 'checkout' %}"
+                  })
+    }
+</script>
 {% endblock %}
